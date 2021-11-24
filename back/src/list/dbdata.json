@@ -1,0 +1,11 @@
+{
+"ETH": {
+    "name": "Ethereum",
+    "symbol": "ETH",
+    "category": "coin",
+    "description": "Ethereum (ETH) is a cryptocurrency . Users are able to generate ETH through the process of mining. Ethereum has a current supply of 118,445,950.874. The last known price of Ethereum is 4,229.97912846 USD and is down -3.67 over the last 24 hours. It is currently trading on 4668 active market(s) with $18,410,737,575.42 traded over the last 24 hours. More information can be found at https://www.ethereum.org/.",
+    "slug": "ethereum",
+    "logo": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png",
+    "date_added": "2015-08-07T00:00:00.000Z"
+    }
+}

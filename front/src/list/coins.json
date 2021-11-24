@@ -1,0 +1,22 @@
+[
+    {
+        "name": "Bitcoin",
+        "symbol": "BTC"
+    },
+    {
+        "name": "Ethereum",
+        "symbol": "ETH"
+    },
+    {
+        "name": "WAX",
+        "symbol": "WAXP"
+    },
+    {
+        "name": "Hive",
+        "symbol": "HIVE"
+    },
+    {
+        "name": "Avalanche",
+        "symbol": "AVAX"
+    }
+]
