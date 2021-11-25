@@ -1,12 +1,9 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { ReactElement } from 'react';
 import './App.css';
-import WS from './Components/WS';
+import Main from './pages/Main';
 
-function App() {
+export default function App(): ReactElement {
   return (
-    <WS/>
+    <Main/>
   );
 }
-
-export default App;

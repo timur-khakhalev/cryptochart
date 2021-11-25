@@ -1,0 +1,58 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "extends": [
+        "plugin:react/recommended",
+        "airbnb"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        },
+        "ecmaVersion": 12,
+        "sourceType": "module"
+    },
+    "plugins": [
+        "react",
+        "@typescript-eslint"
+    ],
+    "settings": {
+        "import/resolver": {
+            "typescript": { }
+                    }
+        },
+    "rules": {
+        "no-use-before-define": "off",
+        "@typescript-eslint/no-use-before-define": ["error"],
+        "react/jsx-filename-extension": ["warn", {"extensions": [".tsx"]}],
+        "@typescript-eslint/explicit-function-return-type": ["error", { "allowExpressions": true }],
+        "react/function-component-definition": ["off", {
+            "namedComponents": "function-declaration",
+            "unnamedComponents": "arrow-function"}],
+        "import/extensions": [
+            "error",
+            "ignorePackages",
+                {
+                    "ts": "never",
+                    "tsx": "never"
+                }],
+        "no-unused-vars": "off",
+        "react/jsx-tag-spacing": ["off",
+            {"beforeSelfClosing": "never"}],
+        "react/jsx-indent": ["off", "tab"],
+        "indent": 0,
+        "no-tabs": 0,
+        "react/jsx-curly-spacing": ["off", "never"],
+        "react/jsx-closing-tag-location": ["off"],
+        "linebreak-style": 0,
+        "eol-last": 0,
+        "max-len": 0,
+        "no-undef": 0,
+        "react/jsx-no-undef": 0,
+        "no-restricted-syntax": 0,
+        "arrow-body-style": "off"
+        }
+}
