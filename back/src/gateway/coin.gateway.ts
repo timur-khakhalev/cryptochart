@@ -1,6 +1,6 @@
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { map, Observable } from 'rxjs';
+import { map, debounceTime, Observable, delay } from 'rxjs';
 import { WebSocketAPI } from '../classes/web-socket-api';
 import * as coinlist from '../list/coins.json'
 

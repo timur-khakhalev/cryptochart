@@ -18,5 +18,17 @@
     {
         "name": "Avalanche",
         "symbol": "AVAX"
+    },
+    {
+        "symbol": "GTC"
+    },
+    {
+        "symbol": "STORJ"
+    },
+    {
+        "symbol": "DEXE"
+    },
+    {
+        "symbol": "PYR"
     }
 ]

@@ -47,12 +47,27 @@
         "no-tabs": 0,
         "react/jsx-curly-spacing": ["off", "never"],
         "react/jsx-closing-tag-location": ["off"],
+        "react/jsx-no-useless-fragment": ["warn"],
         "linebreak-style": 0,
         "eol-last": 0,
         "max-len": 0,
         "no-undef": 0,
         "react/jsx-no-undef": 0,
+        "react/no-array-index-key": 0,
         "no-restricted-syntax": 0,
-        "arrow-body-style": "off"
+        "arrow-body-style": "off",
+        "quote-props": 0,
+        "object-curly-newline": 0,
+        "object-curly-spacing": "warn",
+        "quotes": 0,
+        "comma-dangle": "warn",
+        "semi": "warn",
+        "no-else-return": 0,
+        "dot-notation": 0,
+        "arrow-parens": 0,
+        "no-param-reassign": 0,
+        "prefer-const": 0,
+        "space-in-parens": 0,
+        "no-plusplus": 0
         }
 }
