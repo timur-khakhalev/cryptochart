@@ -9,7 +9,7 @@ export default function Main(): ReactElement {
   return (
     <div>
         <Paper sx={{ m: '1em', p: '1em' }}>
-            <Table>
+              <Table stickyHeader >
                 <TableHead>
                     <TableRow>
                         <TableCell>#</TableCell>
@@ -17,7 +17,8 @@ export default function Main(): ReactElement {
                         <TableCell>Price</TableCell>
                         <TableCell>Change, 24h</TableCell>
                         <TableCell>H/L price, 24h</TableCell>
-                        <TableCell>Coin Volume, 24h</TableCell>
+                        <TableCell>Coin Volume</TableCell>
+                        <TableCell>Pair Volume, 24h</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>

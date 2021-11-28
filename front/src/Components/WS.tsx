@@ -1,26 +1,17 @@
-/* eslint-disable react/jsx-one-expression-per-line */
-/* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable react/no-unstable-nested-components */
-/* eslint-disable dot-notation */
-/* eslint-disable array-callback-return */
-/* eslint-disable consistent-return */
-/* eslint-disable react/jsx-wrap-multilines */
-/* eslint-disable semi */
 import React, { ReactElement, useEffect, useState, useReducer } from 'react';
+import { useSelector, useDispatch } from 'react-redux'
 import { io } from 'socket.io-client';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  TableCell, TableRow,
 } from '@mui/material';
-import getPercentage from '../utils/getPercentage';
-import Tab from './Tab';
-import { reduc, initialState } from '../reducer/reducer'
-import coinlist from '../list/coins.json';
+import { getPercentage, SeparateDigits } from '../utils/utils';
+import { RootState } from '../redux/store'
+import { getWsConnection } from '../redux/slice';
 
 export default function WS(): ReactElement {
-  const [state, dispatch] = useReducer(reduc, initialState)
-  const { products, filtered }: any = state
+  const filtered = useSelector((state: RootState) => state.getWsSlice.filtered)
+  const dispatch = useDispatch()
 
-  const arr = ['BTC', 'ETH', 'AVAX', 'WAXP', 'HIVE', 'GTC', 'STORJ', 'DEXE', 'PYR', 'MASK']
   useEffect(() => {
     const socket = io('ws://localhost:811', { transports: ['websocket'] });
     socket.on('connect', () => {
@@ -38,33 +29,28 @@ export default function WS(): ReactElement {
       console.log(engine.transport.name); // in most cases, prints "polling"
     });
 
-      // eslint-disable-next-line react/no-this-in-sfc
       socket.on('msg', (res) => {
-        dispatch({type: 'set', payload: res.data})
+        dispatch(getWsConnection(res.data))
       });
   }, []);
   if (filtered) {
     return (
       <>
       {
-        // eslint-disable-next-line array-callback-return
           filtered.map((f: any, i: number) => {
-            // eslint-disable-next-line dot-notation
-              // eslint-disable-next-line react/no-array-index-key
+            const changePercent = getPercentage(f.c, f.o)
               if (i < 30) {
-              return <>
-                <TableRow>
+              return <TableRow>
                   <TableCell>{i + 1}</TableCell>
                   <TableCell>{f.s}</TableCell>
-                  <TableCell>{Number.parseFloat(f.c).toFixed(4)}</TableCell>
-                  <TableCell>{getPercentage(f.c, f.o)}</TableCell>
-                  <TableCell>{Number.parseFloat(f.h).toFixed(4)} / {Number.parseFloat(f.l).toFixed(4)}</TableCell>
-                  <TableCell>{Number.parseFloat(f.q).toFixed(2)}</TableCell>
+                  <TableCell>{f.c > 0.0001 ? f.c.toFixed(4) : f.c}</TableCell>
+                <TableCell sx={changePercent > 0 ? { color: '#16c784'} : { color: '#ea3943' }} >{changePercent}</TableCell>
+                  <TableCell>{f.h > 0.0001 ? f.h.toFixed(4) : f.h} / {f.l > 0.0001 ? f.l.toFixed(4) : f.l}</TableCell>
+                  <TableCell>{SeparateDigits(f.v.toFixed(0))}</TableCell>
+                  <TableCell>{SeparateDigits(f.q.toFixed(2))}</TableCell>
               </TableRow>
-            </>
               }
           })
-
     }
     </>
     )

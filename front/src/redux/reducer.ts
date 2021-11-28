@@ -1,23 +1,11 @@
 /* eslint-disable yoda */
 /* eslint-disable array-callback-return */
 /* eslint-disable consistent-return */
-import _ from 'lodash';
 
-const initialState = {
-    products: {},
-    filtered: []
-};
 const filtered: any = []
-const arr = ['BTC', 'ETH', 'AVAX', 'WAXP', 'HIVE']
 const coinNames: any = []
 
-function findIn(filterArr: any, c: any): number {
-    return _.findIndex(filterArr, (o: any) => {
-            return o.s === `${c}USDT`
-        })
-}
-
-function reduc(state: any, action: any): any {
+function getWsReducer(state: any, action: any): any {
     switch (action.type) {
         case 'set': {
             const newestData = action.payload
@@ -47,4 +35,4 @@ function reduc(state: any, action: any): any {
     }
 }
 
-export { initialState, reduc };
+export default { getWsReducer };
