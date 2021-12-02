@@ -1,5 +1,6 @@
 export interface IWsConnection {
     _coin: string[],
+    coinId: string,
     _o: number,
     e: string,
     E: string,

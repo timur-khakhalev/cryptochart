@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 import React, { ReactElement, useEffect, useState, useReducer } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import { io } from 'socket.io-client';
@@ -10,9 +11,11 @@ import { getWsConnection } from '../redux/slice';
 
 export default function WS(): ReactElement {
   const filtered = useSelector((state: RootState) => state.getWsSlice.filtered)
+  const sortBy = useSelector((state: RootState) => state.getWsSlice.sortBy)
   const dispatch = useDispatch()
-
-  useEffect(() => {
+  useEffect(
+    () => {
+    const prevSort: string = sortBy
     const socket = io('ws://localhost:811', { transports: ['websocket'] });
     socket.on('connect', () => {
       console.log('Connection established from client');
@@ -22,22 +25,25 @@ export default function WS(): ReactElement {
         // pair: 'usdt',
         method: '!miniTicker@arr',
       };
-
       socket.emit('events', msg, (res: any) => {
       });
-      const { engine } = socket.io;
-      console.log(engine.transport.name); // in most cases, prints "polling"
     });
 
-      socket.on('msg', (res) => {
-        dispatch(getWsConnection(res.data))
-      });
-  }, []);
+    socket.on('msg', (res) => {
+      dispatch(getWsConnection({data: res.data, sort: sortBy}))
+    });
+    return () => {
+      prevSort !== sortBy
+      socket.disconnect()
+    }
+  },
+    [sortBy]
+    );
   if (filtered) {
     return (
       <>
       {
-          filtered.map((f: any, i: number) => {
+          (filtered).map((f: any, i: number) => {
             const changePercent = getPercentage(f.c, f.o)
               if (i < 30) {
               return <TableRow>

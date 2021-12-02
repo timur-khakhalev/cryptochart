@@ -1,12 +1,19 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { IWsConnection, IminiTicker } from '../interfaces/IWsConnection';
+import { getPercentage } from '../utils/utils';
 
 export interface FilteredState{
-    filtered: string[]
+    filtered: string[],
+    sortBy: string,
+    sortType: boolean,
+    coins: string[]
 }
 
 const initialState: FilteredState = {
-    filtered: []
+    filtered: [],
+    sortBy: '',
+    sortType: false,
+    coins: []
 }
 const filteredArray: any = [];
 const coinNames: string[] = [];
@@ -16,18 +23,18 @@ export const getWsSlice = createSlice({
     initialState,
     reducers: {
         getWsConnection: (state, action) => {
-            const newestData = action.payload
+            const newestData = action.payload.data
             newestData.forEach((_coin: IWsConnection) => {
                 const _coinConverted: IminiTicker = {
                     e: _coin.e,
-                    E: Number.parseInt(_coin.E, 10),
+                    E: +_coin.E,
                     s: _coin.s,
-                    c: Number.parseFloat(_coin.c),
-                    o: Number.parseFloat(_coin.o),
-                    h: Number.parseFloat(_coin.h),
-                    l: Number.parseFloat(_coin.l),
-                    v: Number.parseInt(_coin.v, 10),
-                    q: Number.parseFloat(_coin.q)
+                    c: +_coin.c,
+                    o: +_coin.o,
+                    h: +_coin.h,
+                    l: +_coin.l,
+                    v: +_coin.v,
+                    q: +_coin.q
                 }
                 if (coinNames.length > 0) {
                     if (!coinNames.includes(_coinConverted.s)) coinNames.push(_coinConverted.s)
@@ -43,11 +50,66 @@ export const getWsSlice = createSlice({
                     }
                 });
             });
+            switch (state.sortBy) {
+                case 'price':
+                    state.sortType ? state.filtered = [...filteredArray.sort((a: IminiTicker, b: IminiTicker) => {
+                        if (a.c < b.c) return -1
+                        if (a.c > b.c) return 1
+                        else return 0
+                    })] : state.filtered = [...filteredArray.sort((a: IminiTicker, b: IminiTicker) => {
+                        if (a.c > b.c) return -1
+                        if (a.c < b.c) return 1
+                        else return 0
+                    })]
+                    break
+                case 'change':
+                    state.sortType ? state.filtered = [...filteredArray.sort((a: IminiTicker, b: IminiTicker) => {
+                        if (getPercentage(a.c, a.o) < getPercentage(b.c, b.o)) return -1
+                        if (getPercentage(a.c, a.o) > getPercentage(b.c, b.o)) return 1
+                        else return 0
+                    })] : state.filtered = [...filteredArray.sort((a: IminiTicker, b: IminiTicker) => {
+                        if (getPercentage(a.c, a.o) > getPercentage(b.c, b.o)) return -1
+                        if (getPercentage(a.c, a.o) < getPercentage(b.c, b.o)) return 1
+                        else return 0
+                    })]
+                    break
+                case 'coinVolume':
+                    state.sortType ? state.filtered = [...filteredArray.sort((a: IminiTicker, b: IminiTicker) => {
+                        if (a.v < b.v) return -1
+                        if (a.v > b.v) return 1
+                        else return 0
+                    })] : state.filtered = [...filteredArray.sort((a: IminiTicker, b: IminiTicker) => {
+                        if (a.v > b.v) return -1
+                        if (a.v < b.v) return 1
+                        else return 0
+                    })]
+                    break
+                case 'pairVolume':
+                    state.sortType ? state.filtered = [...filteredArray.sort((a: IminiTicker, b: IminiTicker) => {
+                        if (a.q < b.q) return -1
+                        if (a.q > b.q) return 1
+                        else return 0
+                    })] : state.filtered = [...filteredArray.sort((a: IminiTicker, b: IminiTicker) => {
+                        if (a.q > b.q) return -1
+                        if (a.q < b.q) return 1
+                        else return 0
+                    })]
+                    break
+                default:
+                    state.filtered = [...filteredArray]
+            }
             state.filtered = [...filteredArray]
+        },
+        setSortBy: (state, action) => {
+            state.sortBy = action.payload.sorting
+            state.sortType = action.payload.sortType
+        },
+        setCoins: (state, action) => {
+            state.coins = action.payload.coins
         }
     }
 })
 
-export const { getWsConnection } = getWsSlice.actions
+export const { getWsConnection, setSortBy, setCoins } = getWsSlice.actions
 
 export default getWsSlice.reducer

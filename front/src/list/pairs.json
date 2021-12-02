@@ -1,0 +1,28 @@
+{
+    "main": [
+        "BUSD",
+        "USDT",
+        "BNB",
+        "BTC",
+        "ETH",
+        "TRX",
+        "DOGE"
+    ],
+    "fiat": [
+        "AUD",
+        "BIDR",
+        "BRL",
+        "EUR",
+        "GBP",
+        "RUB",
+        "TRY",
+        "TUSD",
+        "USDC",
+        "DAI",
+        "IDRT",
+        "UAH",
+        "NGN",
+        "VAI",
+        "USDP"
+    ]
+}

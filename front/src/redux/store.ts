@@ -3,7 +3,9 @@ import getWsSliceReducer from './slice'
 
 export const store = configureStore({
     reducer: {
-        getWsSlice: getWsSliceReducer
+        getWsSlice: getWsSliceReducer,
+        setSortBy: getWsSliceReducer,
+        setCoins: getWsSliceReducer
     }
 })
 
