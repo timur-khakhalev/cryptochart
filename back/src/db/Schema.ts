@@ -23,8 +23,8 @@ export class Cryptocurrency {
     @Prop()
     logo: string
 
-    // @Prop([String])
-    // urls: { website: string[]; witter: string[]; message_board: string[]; chat: string[]; facebook: any[]; explorer: string[]; reddit: string[]; technical_doc: string[]; source_code: string[]; announcement: string[] };
+    @Prop()
+    urls: string[]
 
     @Prop()
     date_added: string

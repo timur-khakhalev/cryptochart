@@ -85,6 +85,9 @@
         "no-unneeded-ternary": 0,
         "no-return-assign": 0,
         "no-unused-expressions": 0,
-        "no-shadow": 0
+        "no-shadow": 0,
+        "no-lonely-if": 0,
+        "camelcase": 0,
+        "jsx-a11y/alt-text": 0
         }
 }

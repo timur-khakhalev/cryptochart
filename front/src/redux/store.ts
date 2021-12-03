@@ -5,7 +5,8 @@ export const store = configureStore({
     reducer: {
         getWsSlice: getWsSliceReducer,
         setSortBy: getWsSliceReducer,
-        setCoins: getWsSliceReducer
+        setCoins: getWsSliceReducer,
+        getData: getWsSliceReducer
     }
 })
 

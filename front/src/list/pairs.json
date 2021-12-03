@@ -24,5 +24,29 @@
         "NGN",
         "VAI",
         "USDP"
+    ],
+    "all": [
+        "BUSD",
+        "USDC",
+        "BNB",
+        "BTC",
+        "ETH",
+        "TRX",
+        "DOGE",
+        "AUD",
+        "BIDR",
+        "BRL",
+        "EUR",
+        "GBP",
+        "RUB",
+        "TRY",
+        "TUSD",
+        "USDT",
+        "DAI",
+        "IDRT",
+        "UAH",
+        "NGN",
+        "VAI",
+        "USDP"
     ]
 }

@@ -5,6 +5,6 @@ export class CryptocurrencyDto {
     description: string;
     slug: string;
     logo: string;
-    // urls: { website: string[]; witter: string[]; message_board: string[]; chat: string[]; facebook: any[]; explorer: string[]; reddit: string[]; technical_doc: string[]; source_code: string[]; announcement: string[]};
+    urls: string[];
     date_added: string;
 }

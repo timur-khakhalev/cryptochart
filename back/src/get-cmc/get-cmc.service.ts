@@ -30,7 +30,8 @@ export class GetCmcService {
                         description: res.data.data[r.toUpperCase()]['description'],
                         slug: res.data.data[r.toUpperCase()]['slug'],
                         logo: res.data.data[r.toUpperCase()]['logo'],
-                        date_added: res.data.data[r.toUpperCase()]['date_added']
+                        date_added: res.data.data[r.toUpperCase()]['date_added'],
+                        urls: res.data.data[r.toUpperCase()]['urls']
                     })
                 })
             })
