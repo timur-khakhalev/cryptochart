@@ -1,17 +1,20 @@
 /* eslint-disable no-continue */
 import axios from 'axios'
 import { createSlice } from '@reduxjs/toolkit'
-import { IWsConnection, IminiTicker } from '../interfaces/IWsConnection';
+import { IWsConnection, IminiTicker, ICells } from '../interfaces/IWsConnection';
 import { getPercentage } from '../utils/utils';
 import pairs from '../list/pairs.json'
 
 export interface FilteredState{
-    filtered: string[],
+    filtered: ICells[],
     sortBy: string,
     sortType: boolean,
     coins: string[],
     coinsArrFilter: string[],
-    metadata: string[]
+    metadata: string[],
+    search: string,
+    dnwPagination: number,
+    upwPagination: number
 }
 
 const initialState: FilteredState = {
@@ -20,7 +23,10 @@ const initialState: FilteredState = {
     sortType: false,
     coins: [],
     coinsArrFilter: [],
-    metadata: []
+    metadata: [],
+    search: '',
+    dnwPagination: 0,
+    upwPagination: 50
 }
 const filteredArray: any = [];
 let buff: any = []
@@ -192,10 +198,24 @@ export const getWsSlice = createSlice({
             //     state.metadata.push(res.data)
             // })
             // console.log(state.metadata)
+        },
+        searchField: (state, action) => {
+            state.search = action.payload
+        },
+        pagination: (state, action) => {
+            if (action.payload.direction === 'back') {
+                if (state.dnwPagination > 0) {
+                    state.dnwPagination -= 50
+                    state.upwPagination -= 50
+                }
+            } else {
+                    state.dnwPagination += 50
+                    state.upwPagination += 50
+            }
         }
     }
 })
 
-export const { getWsConnection, setSortBy, setCoins, getData } = getWsSlice.actions
+export const { getWsConnection, setSortBy, setCoins, getData, searchField, pagination } = getWsSlice.actions
 
 export default getWsSlice.reducer

@@ -1,33 +1,25 @@
 import React, { useState, useEffect, ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
-import Paper from '@mui/material/Paper';
 import {
-    Box, Chip, Button, Table, TableBody, TableCell, TableSortLabel, TableContainer, TableHead, TableRow,
+    Box, Paper, Chip, TextField, Button, IconButton, Table, TableBody, TableCell, TableSortLabel, TableContainer, TableHead, TableRow, Popover, Typography
 } from '@mui/material';
-import Popover from '@mui/material/Popover'
+import { AttachMoney, ArrowBack, ArrowForward} from '@mui/icons-material';
 import axios from 'axios'
 import WS from '../components/WS';
 import { RootState } from '../redux/store'
-import { setSortBy, setCoins } from '../redux/slice';
+import { setSortBy, setCoins, searchField, pagination } from '../redux/slice';
 import pairs from '../list/pairs.json';
 
 export default function Main(): ReactElement {
     const sortBy = useSelector((state: RootState) => state.getWsSlice.sortBy)
     const metadata = useSelector((state: RootState) => state.getWsSlice.metadata)
     const coinsArrFilter = useSelector((state: RootState) => state.getWsSlice.coinsArrFilter)
-    const [ascSort, setSort] = useState(false)
+    const [ascSort, setSort] = useState({ sortByColumn: '', sortDirection: false})
     const [_coin, _setCoin] = useState<Set<string>>(new Set())
     const dispatch = useDispatch()
-    const heads = {
-        price: 'Price',
-        change: 'Change, 24h',
-        hl: 'H/L Price, 24h',
-        cv: 'Coin Volume, 24h',
-        pv: 'Pair Volume, 24h'
-    }
     const handleSort = (sortBy: string): void => {
-        setSort(!ascSort)
-        dispatch(setSortBy({sorting: sortBy, sortType: ascSort}))
+        setSort({ sortByColumn: sortBy, sortDirection: !ascSort.sortDirection})
+        dispatch(setSortBy({sorting: sortBy, sortType: ascSort.sortDirection}))
     }
 
     const __coinsArrayToRedux: string[] = []
@@ -44,7 +36,7 @@ export default function Main(): ReactElement {
         dispatch(setCoins({coins: __coinsArrayToRedux}))
     }
 
-    const handleSendMeta = () => {
+    const handleSendMeta = () => { //TODO:Переделать в отдельную функцию и сохранить
         // console.log(metadata)
         const buffSet = new Set()
         let buff: any = []
@@ -85,6 +77,10 @@ export default function Main(): ReactElement {
         setAnchorEl(null);
     };
 
+    const handleChangeSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+        dispatch(searchField(event.target.value.toUpperCase()))
+    };
+
     const open = Boolean(anchorEl);
     const id = open ? 'simple-popover' : undefined;
 
@@ -97,35 +93,58 @@ export default function Main(): ReactElement {
           >
               <Box sx={{width: '22.5em'}}>
               {pairs.fiat.map((p: string, i: number) => {
-                  return <Chip variant={_coin.has(p) ? 'filled' : 'outlined'} onDelete={() => handleCoins(p)} onClick={() => { handleCoins(p); }} sx={{ m: '.5em' }} label={p} />
+                  return <Chip variant={_coin.has(p) ? 'filled' : 'outlined'} onClick={() => { handleCoins(p); }} sx={{ m: '.5em' }} label={p} />
               })}
               </Box>
           </Popover>
         <Paper sx={{ m: '1em', p: '1em' }}>
+              <TextField
+                sx={{bottom: '.3em', width: '7.5em'}}
+                id="search"
+                margin="dense"
+                size="small"
+                label="Search Coin"
+                onChange={handleChangeSearch}
+              />
+              <Box sx={{mx: '.5em', display: 'inline-block'}}>
+                  Pages
+                  <IconButton onClick={() => dispatch(pagination({ direction: 'back' }))}>
+                      <ArrowBack />
+                  </IconButton>
+                  <IconButton onClick={() => dispatch(pagination({ direction: 'forward' }))}>
+                      <ArrowForward />
+                  </IconButton>
+              </Box>
             {pairs.main.map((p: string) => {
-                return <Chip variant={ _coin.has(p) ? 'filled' : 'outlined' } onDelete={() => handleCoins(p)} onClick={() => { handleCoins(p); }} sx={{m: '.5em'}} label={p} />
+                return <Chip sx={{m: '.5em' }} variant={ _coin.has(p) ? 'filled' : 'outlined' } onClick={() => { handleCoins(p); }} label={p} />
             })}
-            <Button color="info" variant="outlined" onClick={handleClick}>Fiats {coinsArrFilter.length > 0 ? `(${coinsArrFilter.length})` : ''}</Button>
-              <Button onClick={() => handleSendMeta()}>
-                  Send nudes
-              </Button>
+            <Button startIcon={<AttachMoney/>} size="small" color="inherit" variant="outlined" onClick={handleClick}>Fiats {coinsArrFilter.length > 0 ? `(${coinsArrFilter.length})` : ''}</Button>
               <Table stickyHeader >
                 <TableHead>
                     <TableRow>
                           <TableCell>#</TableCell>
                           <TableCell>Logo</TableCell>
                           <TableCell>Symbol</TableCell>
-                          <TableCell><TableSortLabel direction={ascSort || sortBy === heads.price ? 'desc' : 'asc'} active={true} onClick={() => handleSort('price')} >{heads.price}</TableSortLabel></TableCell>
-                          <TableCell align="center"><TableSortLabel direction={ascSort || sortBy === heads.change ? 'desc' : 'asc'} active={true} onClick={() => handleSort('change')}>{heads.change}</TableSortLabel></TableCell>
+                          <TableCell><TableSortLabel direction={ascSort.sortDirection && ascSort.sortByColumn === 'price' ? 'asc' : !ascSort.sortDirection && ascSort.sortByColumn === 'price' ? 'desc' : 'asc'} active={true} onClick={() => handleSort('price')} >Price</TableSortLabel></TableCell>
+                          <TableCell align="center"><TableSortLabel direction={ascSort.sortDirection && ascSort.sortByColumn === 'change' ? 'asc' : !ascSort.sortDirection && ascSort.sortByColumn === 'change' ? 'desc' : 'asc'} active={true} onClick={() => handleSort('change')}>Change, 24h</TableSortLabel></TableCell>
                         <TableCell align="center">H/L price, 24h</TableCell>
-                          <TableCell align="center"><TableSortLabel direction={ascSort ? 'desc' : 'asc'} active={true} onClick={() => handleSort('coinVolume')}>Coin Volume</TableSortLabel></TableCell>
-                          <TableCell align="center"><TableSortLabel direction={ascSort ? 'desc' : 'asc'} active={true} onClick={() => handleSort('pairVolume')}>Pair Volume, 24h</TableSortLabel></TableCell>
+                          <TableCell align="center"><TableSortLabel direction={ascSort.sortDirection && ascSort.sortByColumn === 'coinVolume' ? 'asc' : !ascSort.sortDirection && ascSort.sortByColumn === 'coinVolume' ? 'desc' : 'asc'} active={true} onClick={() => handleSort('coinVolume')}>Coin Volume, 24h</TableSortLabel></TableCell>
+                          <TableCell align="center"><TableSortLabel direction={ascSort.sortDirection && ascSort.sortByColumn === 'pairVolume' ? 'asc' : !ascSort.sortDirection && ascSort.sortByColumn === 'pairVolume' ? 'desc' : 'asc'} active={true} onClick={() => handleSort('pairVolume')}>Pair Volume, 24h</TableSortLabel></TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     <WS/>
                 </TableBody>
             </Table>
+              <Box sx={{m: '0 auto', width: '10em'}}>
+                  Pages
+                  <IconButton onClick={() => dispatch(pagination({ direction: 'back' }))}>
+                      <ArrowBack />
+                  </IconButton>
+                  <IconButton onClick={() => dispatch(pagination({ direction: 'forward' }))}>
+                      <ArrowForward />
+                  </IconButton>
+              </Box>
         </Paper>
     </div>
   );

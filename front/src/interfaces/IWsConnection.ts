@@ -12,7 +12,21 @@ export interface IWsConnection {
     h: string,
     l: string,
     v: string,
-    q: string
+    q: string,
+}
+
+export interface ICells {
+    s: string,
+    p: string,
+    c: number,
+    o: number,
+    h: number,
+    l: number,
+    v: number,
+    q: number,
+    changePercent?: number;
+    i?: number;
+    logo?: string
 }
 
 export interface IminiTicker {

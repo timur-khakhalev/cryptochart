@@ -8,12 +8,17 @@ import {
 import { getPercentage, SeparateDigits } from '../utils/utils';
 import { RootState } from '../redux/store'
 import { getWsConnection } from '../redux/slice';
+import { Cells } from './Cells'
+import { ICells } from '../interfaces/IWsConnection';
 
 export default function WS(): ReactElement {
   const filtered = useSelector((state: RootState) => state.getWsSlice.filtered)
   const sortBy = useSelector((state: RootState) => state.getWsSlice.sortBy)
   const metadata = useSelector((state: RootState) => state.getWsSlice.metadata)
+  const searchValue = useSelector((state: RootState) => state.getWsSlice.search)
   const coinsArrFilter = useSelector((state: RootState) => state.getWsSlice.coinsArrFilter)
+  const dnwPagination = useSelector((state: RootState) => state.getWsSlice.dnwPagination)
+  const upwPagination = useSelector((state: RootState) => state.getWsSlice.upwPagination)
   const dispatch = useDispatch()
   useEffect(
     () => {
@@ -47,41 +52,79 @@ export default function WS(): ReactElement {
     return (
       <>
       {
-          (filtered).map((f: any, i: number) => {
+          (filtered).map((f: ICells, i: number) => {
             // console.log(coinsArrFilter)
             if (coinsArrFilter.length > 0) {
                 for (let _coin of coinsArrFilter) {
                   if (f.p === _coin) {
                     const changePercent = getPercentage(f.c, f.o)
                     // if (i < 30) {
-                      return <TableRow>
-                                <TableCell>{i + 1}</TableCell>
-                                <TableCell><Avatar sx={{ width: 24, height: 24 }} src={f.logo} /></TableCell>
-                                <TableCell>{f.s}/{f.p} {f.sp}</TableCell>
-                                <TableCell>{f.c > 0.0001 ? f.c.toFixed(4) : f.c}</TableCell>
-                                <TableCell sx={changePercent > 0 ? { color: '#16c784'} : { color: '#ea3943' }} >{changePercent}</TableCell>
-                                <TableCell>{f.h > 0.0001 ? f.h.toFixed(4) : f.h} / {f.l > 0.0001 ? f.l.toFixed(4) : f.l}</TableCell>
-                                <TableCell>{SeparateDigits(f.v.toFixed(0))}</TableCell>
-                                <TableCell>{SeparateDigits(f.q.toFixed(2))}</TableCell>
-                            </TableRow>
+                    if (searchValue) {
+                      if (f.s.match(searchValue)) {
+                        return <Cells
+                          s={f.s}
+                          p={f.p}
+                          c={f.c}
+                          o={f.o}
+                          h={f.h}
+                          l={f.l}
+                          v={f.v}
+                          q={f.q}
+                          i={i}
+                          logo={f.logo}
+                          changePercent={changePercent} />
+                      }
+                    } else {
+                      return <Cells
+                        s={f.s}
+                        p={f.p}
+                        c={f.c}
+                        o={f.o}
+                        h={f.h}
+                        l={f.l}
+                        v={f.v}
+                        q={f.q}
+                        i={i}
+                        logo={f.logo}
+                        changePercent={changePercent} />
+                    }
                   // }
                 }
             }
           } else {
               const changePercent = getPercentage(f.c, f.o)
-              if (i < 30) {
-                return <TableRow>
-                  <TableCell>{i + 1}</TableCell>
-                  <TableCell><Avatar sx={{ width: 24, height: 24 }} src={f.logo} /></TableCell>
-                  <TableCell>{f.s}/{f.p} {f.sp}</TableCell>
-                  <TableCell>{f.c > 0.0001 ? f.c.toFixed(4) : f.c}</TableCell>
-                  <TableCell align="center" sx={changePercent > 0 ? { color: '#16c784' } : { color: '#ea3943' }} >{changePercent}</TableCell>
-                  <TableCell align="center" >{f.h > 0.0001 ? f.h.toFixed(4) : f.h} / {f.l > 0.0001 ? f.l.toFixed(4) : f.l}</TableCell>
-                  <TableCell align="center">{SeparateDigits(f.v.toFixed(0))}</TableCell>
-                  <TableCell align="center">{SeparateDigits(f.q.toFixed(2))}</TableCell>
-                </TableRow>
+                if (searchValue) {
+                  if (f.s.match(searchValue)) {
+                      return <Cells
+                            s={f.s}
+                            p={f.p}
+                            c={f.c}
+                            o={f.o}
+                            h={f.h}
+                            l={f.l}
+                            v={f.v}
+                            q={f.q}
+                            i={i}
+                            logo={f.logo}
+                            changePercent={changePercent}/>
+                  }
+                } else {
+                  if (i >= dnwPagination && i < upwPagination) {
+                    return <Cells
+                      s={f.s}
+                      p={f.p}
+                      c={f.c}
+                      o={f.o}
+                      h={f.h}
+                      l={f.l}
+                      v={f.v}
+                      q={f.q}
+                      i={i}
+                      logo={f.logo}
+                      changePercent={changePercent} />
+                  }
+                }
               }
-          }
           })
     }
     </>

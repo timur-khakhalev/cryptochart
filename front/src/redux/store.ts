@@ -6,7 +6,9 @@ export const store = configureStore({
         getWsSlice: getWsSliceReducer,
         setSortBy: getWsSliceReducer,
         setCoins: getWsSliceReducer,
-        getData: getWsSliceReducer
+        getData: getWsSliceReducer,
+        searchField: getWsSliceReducer,
+        pagination: getWsSliceReducer
     }
 })
 
