@@ -10,8 +10,14 @@ export interface IMiniTicker {
     quote: string
 }
 
-export interface ICryptocurrencies {
+// export interface ICryptocurrencies {
+//     readonly method: string,
+//     readonly coin?: {name: string, symbol: string}[]
+//     readonly pair?: string,
+// }
+
+export interface IGatewayInput {
     readonly method: string,
-    readonly coin?: {name: string, symbol: string}[]
-    readonly pair?: string,
+    readonly pairs?: string[],
+    readonly pair?: string
 }

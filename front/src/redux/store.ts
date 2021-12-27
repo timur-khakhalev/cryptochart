@@ -1,15 +1,20 @@
 import { configureStore } from '@reduxjs/toolkit'
-import getWsSliceReducer from './slice'
+import getWsSliceReducer, { getWsSlice } from './slice'
 
 export const store = configureStore({
     reducer: {
         getWsSlice: getWsSliceReducer,
         setSortBy: getWsSliceReducer,
-        setCoins: getWsSliceReducer,
-        getData: getWsSliceReducer,
+        pairFiltering: getWsSliceReducer,
         searchField: getWsSliceReducer,
-        pagination: getWsSliceReducer
-    }
+        pagination: getWsSliceReducer,
+        getKlineData: getWsSliceReducer,
+        getKlineFromDb: getWsSliceReducer,
+        snackToggle: getWsSliceReducer
+    },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+            serializableCheck: false,
+        })
 })
 
 export type RootState = ReturnType<typeof store.getState>

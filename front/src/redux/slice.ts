@@ -1,35 +1,42 @@
 /* eslint-disable no-continue */
 import axios from 'axios'
 import { createSlice } from '@reduxjs/toolkit'
-import { IWsConnection, IminiTicker, ICells } from '../interfaces/IWsConnection';
-import { getPercentage } from '../utils/utils';
+import { IWsConnection, IminiTicker, ICells, IKline } from '../interfaces/IWsConnection';
+import { getPercentage, klineSaveOrUpdate } from '../utils/utils';
 import pairs from '../list/pairs.json'
 
-export interface FilteredState{
-    filtered: ICells[],
+export interface coinTickerState{
+    coinTicker: ICells[],
+    klineFromDb: any[]
     sortBy: string,
     sortType: boolean,
-    coins: string[],
-    coinsArrFilter: string[],
+    pairFilter: string[],
     metadata: string[],
     search: string,
     dnwPagination: number,
-    upwPagination: number
+    upwPagination: number,
+    checkKlineIsReady: boolean,
+    klinePairs: object,
+    snack: boolean
 }
 
-const initialState: FilteredState = {
-    filtered: [],
+const initialState: coinTickerState = {
+    coinTicker: [],
+    klineFromDb: [],
     sortBy: '',
     sortType: false,
-    coins: [],
-    coinsArrFilter: [],
+    pairFilter: [],
     metadata: [],
     search: '',
     dnwPagination: 0,
-    upwPagination: 50
+    upwPagination: 30,
+    checkKlineIsReady: false,
+    klinePairs: {},
+    snack: false
 }
-const filteredArray: any = [];
-let buff: any = []
+const coinTickerArray: any = [];
+const klineArray: any = []
+const klineCoinNames: any = new Set()
 let metaData: any = []
 const coinNames: any = new Set()
 const symbolsSet: any = new Set()
@@ -48,7 +55,6 @@ export const getWsSlice = createSlice({
             if (metaData.length === 0) {
                 getDatas()
             }
-            // console.log(metaData.length)
             newestData.forEach((_coin: IWsConnection) => {
                 const _coinConverted: IminiTicker = {
                     e: _coin.e,
@@ -62,7 +68,7 @@ export const getWsSlice = createSlice({
                     l: +_coin.l,
                     v: +_coin.v,
                     q: +_coin.q,
-                    urls: {
+                    urls: [{
                         website: [],
                         twitter: [],
                         message_board: [],
@@ -73,131 +79,114 @@ export const getWsSlice = createSlice({
                         technical_doc: [],
                         source_code: [],
                         announcement: []
-                    },
+                    }],
                     logo: '',
                     slug: '',
                     description: '',
+                    date_added: '',
                     category: '',
                     name: '',
-                    symbol: ''
+                    symbol: '',
+                    kline: []
                 }
                 coinNames.add(_coin.s)
-                // console.log(metaData.length)
-                // metaData.forEach((c: any) => {
-                //     console.log(c.symbol)
-                // })
-                // for (let x of metaData) {
-                //     x.forEach((_c: any) => console.log(_c))
-                // }
+                state.klinePairs = [...coinNames]
+                state.checkKlineIsReady = true
                 coinNames.forEach((_cName: any) => {
                     if (_cName === _coinConverted.sp) {
-                        // console.log(metaData)
-                        pairs.all.forEach(x => {
+                        pairs.all.forEach(x => { // Creates pair for every coin
                             let i = _coinConverted.sp.indexOf(x)
                             if (i > 1) {
                                 _coinConverted.s = _coinConverted.sp.slice(0, i)
                             }
                         })
                         symbolsSet.add(_coinConverted.s)
-                        state.metadata = [...symbolsSet]
-                        // console.log(_coinConverted.s)
                         _coinConverted.p = pairs.all.find(x => {
                             let i = _coinConverted.sp.indexOf(x)
                             if (i > 1) {
                                 return _coinConverted.sp.slice(i)
                             }
                         })!
-                                                // const _searchInMeta = metaData.find((_x: any) => {
-                        //     // console.log(`${_coinConverted.s} // ${_x.symbol}`)
-                        //     _coinConverted.s === _x.symbol
-                        // })
-                        // console.log(_searchInMeta)
-                        // console.log(_coinConverted)
-                        // let i: number;
-                        // for (let x of pairs.all) {
-                        //     i = _coinConverted.s.indexOf(x)
-                        //     if (i > 2) {
-                        //         _coinConverted.s = _coinConverted.s.slice(0, i)
-                        //         _coinConverted.p = _cName.slice(_coinConverted.s.indexOf(x), x.length)
-                        //     }
-                        // }
-                        const index = filteredArray.findIndex((_o: IWsConnection) => _o.sp === _cName)
+                        const index = coinTickerArray.findIndex((_o: IWsConnection) => _o.sp === _cName)
                         if (index >= 0) {
-                            // let buffer: any = []
                             metaData.forEach((_c: any) => {
                                 if (_c.symbol === _coinConverted.s) {
+                                    _coinConverted.urls = _c.urls
                                     _coinConverted.logo = _c.logo
+                                    _coinConverted.slug = _c.slug
+                                    _coinConverted.description = _c.description
+                                    _coinConverted.category = _c.category
+                                    _coinConverted.symbol = _c.symbol
+                                    _coinConverted.name = _c.name
+                                    _coinConverted.date_added = _c.date_added
                                 }
                             })
-                            filteredArray[index] = _coinConverted
+                            const klineIndex = state.klineFromDb.findIndex((_o: any) => _o.pair === _cName)
+                            if (klineIndex >= 0) {
+                                _coinConverted.kline = JSON.parse(JSON.stringify(state.klineFromDb[klineIndex].h8))
+                            }
+                            coinTickerArray[index] = JSON.parse(JSON.stringify(_coinConverted))
                         } else {
-                            filteredArray.push(_coinConverted)
+                            coinTickerArray.push(_coinConverted)
                         }
                     }
                 })
             });
             switch (state.sortBy) {
                 case 'price':
-                    state.sortType ? state.filtered = [...filteredArray.sort((a: IminiTicker, b: IminiTicker) => {
+                    state.sortType ? state.coinTicker = [...coinTickerArray.sort((a: IminiTicker, b: IminiTicker) => {
                         if (a.c < b.c) return -1
                         if (a.c > b.c) return 1
                         else return 0
-                    })] : state.filtered = [...filteredArray.sort((a: IminiTicker, b: IminiTicker) => {
+                    })] : state.coinTicker = [...coinTickerArray.sort((a: IminiTicker, b: IminiTicker) => {
                         if (a.c > b.c) return -1
                         if (a.c < b.c) return 1
                         else return 0
                     })]
                     break
                 case 'change':
-                    state.sortType ? state.filtered = [...filteredArray.sort((a: IminiTicker, b: IminiTicker) => {
+                    state.sortType ? state.coinTicker = [...coinTickerArray.sort((a: IminiTicker, b: IminiTicker) => {
                         if (getPercentage(a.c, a.o) < getPercentage(b.c, b.o)) return -1
                         if (getPercentage(a.c, a.o) > getPercentage(b.c, b.o)) return 1
                         else return 0
-                    })] : state.filtered = [...filteredArray.sort((a: IminiTicker, b: IminiTicker) => {
+                    })] : state.coinTicker = [...coinTickerArray.sort((a: IminiTicker, b: IminiTicker) => {
                         if (getPercentage(a.c, a.o) > getPercentage(b.c, b.o)) return -1
                         if (getPercentage(a.c, a.o) < getPercentage(b.c, b.o)) return 1
                         else return 0
                     })]
                     break
                 case 'coinVolume':
-                    state.sortType ? state.filtered = [...filteredArray.sort((a: IminiTicker, b: IminiTicker) => {
+                    state.sortType ? state.coinTicker = [...coinTickerArray.sort((a: IminiTicker, b: IminiTicker) => {
                         if (a.v < b.v) return -1
                         if (a.v > b.v) return 1
                         else return 0
-                    })] : state.filtered = [...filteredArray.sort((a: IminiTicker, b: IminiTicker) => {
+                    })] : state.coinTicker = [...coinTickerArray.sort((a: IminiTicker, b: IminiTicker) => {
                         if (a.v > b.v) return -1
                         if (a.v < b.v) return 1
                         else return 0
                     })]
                     break
                 case 'pairVolume':
-                    state.sortType ? state.filtered = [...filteredArray.sort((a: IminiTicker, b: IminiTicker) => {
+                    state.sortType ? state.coinTicker = [...coinTickerArray.sort((a: IminiTicker, b: IminiTicker) => {
                         if (a.q < b.q) return -1
                         if (a.q > b.q) return 1
                         else return 0
-                    })] : state.filtered = [...filteredArray.sort((a: IminiTicker, b: IminiTicker) => {
+                    })] : state.coinTicker = [...coinTickerArray.sort((a: IminiTicker, b: IminiTicker) => {
                         if (a.q > b.q) return -1
                         if (a.q < b.q) return 1
                         else return 0
                     })]
                     break
                 default:
-                    state.filtered = [...filteredArray]
+                    state.coinTicker = [...coinTickerArray]
             }
-            state.filtered = [...filteredArray]
         },
         setSortBy: (state, action) => {
             state.sortBy = action.payload.sorting
             state.sortType = action.payload.sortType
         },
-        setCoins: (state, action) => {
-            state.coinsArrFilter = action.payload.coins
-        },
-        getData: (state, action) => {
-            // axios.get('http://localhost:3000/get-cmc').then((res) => {
-            //     state.metadata.push(res.data)
-            // })
-            // console.log(state.metadata)
+        pairFiltering: (state, action) => {
+            state.pairFilter = action.payload.pairs
         },
         searchField: (state, action) => {
             state.search = action.payload
@@ -205,17 +194,24 @@ export const getWsSlice = createSlice({
         pagination: (state, action) => {
             if (action.payload.direction === 'back') {
                 if (state.dnwPagination > 0) {
-                    state.dnwPagination -= 50
-                    state.upwPagination -= 50
+                    state.dnwPagination -= 30
+                    state.upwPagination -= 30
                 }
             } else {
-                    state.dnwPagination += 50
-                    state.upwPagination += 50
+                    state.dnwPagination += 30
+                    state.upwPagination += 30
             }
-        }
+        },
+        getKlineData: (state, action) => {
+            // klineSaveOrUpdate(action.payload.data, klineArray, klineCoinNames)
+        },
+        getKlineFromDb: (state, action) => {
+            state.klineFromDb = action.payload.data
+        },
+        snackToggle: (state) => { state.snack = !state.snack }
     }
 })
 
-export const { getWsConnection, setSortBy, setCoins, getData, searchField, pagination } = getWsSlice.actions
+export const { getWsConnection, setSortBy, pairFiltering, searchField, pagination, getKlineData, getKlineFromDb, snackToggle } = getWsSlice.actions
 
 export default getWsSlice.reducer

@@ -1,0 +1,85 @@
+.Chip {
+    background: rgb(234, 238, 255);
+    height: 2em;
+    width: auto;
+    padding: 0 1em;
+    margin: 0 .5em;
+    line-height: 1.8em;
+    vertical-align: middle;
+    text-align: center;
+    position: relative;
+    display: inline-block;
+    // border-bottom: 2px solid #BDBDBD;
+    border-radius: 40px;
+    cursor: pointer;
+    -webkit-animation: shadow-hover 1000ms linear reverse both;
+    animation: shadow-hover 1000ms linear reverse both;
+    &:hover {
+        -webkit-animation: shadow-hover 1000ms linear both;
+        animation: shadow-hover 1000ms linear both;
+    };
+    &_fiats {
+        margin: .5em;
+    };
+    &_active {
+        background: rgb(179, 187, 230);
+        color: #fff;
+        font-weight: 500;
+        border: 0;
+        border-radius: 40px;
+        -webkit-box-shadow: 0px 0px 22px -7px rgba(0, 0, 0, .5);
+        -moz-box-shadow: 0px 0px 22px -7px rgba(0, 0, 0, .5);
+        box-shadow: 0px 0px 22px -7px rgba(0, 0, 0, .5);
+        // -webkit-animation: shadow-drop 1s ease-in-out both;
+        // animation: shadow-drop 1s ease-in-out both;
+    }
+}
+
+@keyframes shadow-hover {
+    0% {
+        -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+
+    100% {
+        -webkit-box-shadow: 0px 0px 10px -7px rgba(0, 0, 0, .5);
+        box-shadow: 0px 0px 22px -7px rgba(0, 0, 0, .5);
+    }
+}
+
+@keyframes shadow-hover-reverse {
+    0% {
+        -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+
+    100% {
+        -webkit-box-shadow: 0px 0px 10px -7px rgba(0, 0, 0, .5);
+        box-shadow: 0px 0px 10px -7px rgba(0, 0, 0, .5);
+    }
+}
+
+@keyframes shadow-drop {
+    0% {
+        -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+
+    100% {
+        -webkit-box-shadow: 0px 0px 22px -7px rgba(0, 0, 0, .5);
+        box-shadow: 0px 0px 22px -7px rgba(0, 0, 0, .5);
+    }
+}
+
+@keyframes shadow-drop-reverse {
+    0% {
+        -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+
+    100% {
+        -webkit-box-shadow: 0px 0px 22px -7px rgba(0, 0, 0, .5);
+        box-shadow: 0px 0px 22px -7px rgba(0, 0, 0, .5);
+    }
+
+}

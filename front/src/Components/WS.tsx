@@ -1,67 +1,103 @@
 /* eslint-disable no-unused-expressions */
-import React, { ReactElement, useEffect, useState, useReducer } from 'react';
+import React, { ReactElement, useEffect, Suspense, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import { io } from 'socket.io-client';
-import {
-  TableCell, TableRow, Avatar
-} from '@mui/material';
-import { getPercentage, SeparateDigits } from '../utils/utils';
+import { Snack } from './Snack';
+import { getPercentage } from '../utils/utils';
 import { RootState } from '../redux/store'
-import { getWsConnection } from '../redux/slice';
-import { Cells } from './Cells'
+import { getWsConnection, getKlineData, getKlineFromDb, snackToggle } from '../redux/slice';
+// import { Cells } from './Cells'
 import { ICells } from '../interfaces/IWsConnection';
 
+const Cells = React.lazy(() => import('./Cells'))
 export default function WS(): ReactElement {
-  const filtered = useSelector((state: RootState) => state.getWsSlice.filtered)
+  const [alert, setAlert] = useState<{ show: boolean, message: string, type: string }>({
+    show: false,
+    message: '',
+    type: ''
+  })
+  const coinTicker = useSelector((state: RootState) => state.getWsSlice.coinTicker)
   const sortBy = useSelector((state: RootState) => state.getWsSlice.sortBy)
-  const metadata = useSelector((state: RootState) => state.getWsSlice.metadata)
+  const checkKline = useSelector((state: RootState) => state.getWsSlice.checkKlineIsReady)
+  const klinePairs = useSelector((state: RootState) => state.getWsSlice.klinePairs)
   const searchValue = useSelector((state: RootState) => state.getWsSlice.search)
-  const coinsArrFilter = useSelector((state: RootState) => state.getWsSlice.coinsArrFilter)
+  const pairFilter = useSelector((state: RootState) => state.getWsSlice.pairFilter)
   const dnwPagination = useSelector((state: RootState) => state.getWsSlice.dnwPagination)
   const upwPagination = useSelector((state: RootState) => state.getWsSlice.upwPagination)
   const dispatch = useDispatch()
-  useEffect(
-    () => {
+  useEffect(() => {
     const prevSort: string = sortBy
     const socket = io('ws://localhost:811', { transports: ['websocket'] });
     socket.on('connect', () => {
-      console.log('Connection established from client');
-
+      setAlert({
+        show: true,
+        message: 'Connection established!',
+        type: 'success'
+      })
+      dispatch(snackToggle())
       const msg = {
         // coins: coinlist,
         // pair: 'usdt',
-        method: '!miniTicker@arr',
+        // method: '!miniTicker@arr',
       };
-      socket.emit('events', msg, (res: any) => {
+      socket.emit('$CoinTicker', msg, (res: any) => {
       });
+      if (checkKline) {
+        let buff: string[] = []
+        Object.values(klinePairs).map((v, i) => {
+          if (buff.length < 200) {
+            buff.push(v)
+            const msgKline = {
+              pairs: buff,
+              method: 'kline_8h'
+            }
+            socket.emit('$Kline', msgKline, (res: any) => console.log('data sent', res))
+            buff = []
+          }
+        })
+        console.log(checkKline)
+        socket.emit('$KlineFromDb', 'llsl', (res: any) => dispatch(getKlineFromDb({data: res})))
+      }
     });
 
-    socket.on('msg', (res) => {
+    socket.on('connect_error', (err) => {
+      setAlert({
+        show: true,
+        message: JSON.stringify(err),
+        type: 'error'
+      })
+      console.log(err)
+      dispatch(snackToggle())
+    })
+
+    socket.on('CoinTicker$', (res) => {
       dispatch(getWsConnection({data: res.data, sort: sortBy}))
     });
     return () => {
       prevSort !== sortBy
       socket.disconnect()
     }
-  },
-    [sortBy]
-    );
-    // console.log('meta', metadata)
-    // console.log(coinsArrFilter)
-  if (filtered) {
+  }, [sortBy, checkKline]);
+  if (coinTicker) {
     return (
-      <>
+      // eslint-disable-next-line react/jsx-no-useless-fragment
+      <Suspense fallback={<>Loading..</>}>
+        {
+          alert.show ? <Snack message={alert.message} type={alert.type} /> : ''
+        }
       {
-          (filtered).map((f: ICells, i: number) => {
-            // console.log(coinsArrFilter)
-            if (coinsArrFilter.length > 0) {
-                for (let _coin of coinsArrFilter) {
+      (coinTicker).map((f: ICells, i: number) => {
+            if (pairFilter.length > 0) {
+                for (let _coin of pairFilter) {
                   if (f.p === _coin) {
                     const changePercent = getPercentage(f.c, f.o)
-                    // if (i < 30) {
                     if (searchValue) {
                       if (f.s.match(searchValue)) {
                         return <Cells
+                          urls={f.urls} logo={f.logo} slug={f.slug} description={f.description} category={f.category} name={f.name} symbol={f.symbol} date_added={f.date_added}
+                          kline={f.kline}
+                          key={i}
+                          sp={f.sp}
                           s={f.s}
                           p={f.p}
                           c={f.c}
@@ -71,11 +107,14 @@ export default function WS(): ReactElement {
                           v={f.v}
                           q={f.q}
                           i={i}
-                          logo={f.logo}
                           changePercent={changePercent} />
                       }
                     } else {
                       return <Cells
+                        urls={f.urls} logo={f.logo} slug={f.slug} description={f.description} category={f.category} name={f.name} symbol={f.symbol} date_added={f.date_added}
+                        kline={f.kline}
+                        key={i}
+                        sp={f.sp}
                         s={f.s}
                         p={f.p}
                         c={f.c}
@@ -85,10 +124,8 @@ export default function WS(): ReactElement {
                         v={f.v}
                         q={f.q}
                         i={i}
-                        logo={f.logo}
                         changePercent={changePercent} />
                     }
-                  // }
                 }
             }
           } else {
@@ -96,21 +133,28 @@ export default function WS(): ReactElement {
                 if (searchValue) {
                   if (f.s.match(searchValue)) {
                       return <Cells
-                            s={f.s}
-                            p={f.p}
-                            c={f.c}
-                            o={f.o}
-                            h={f.h}
-                            l={f.l}
-                            v={f.v}
-                            q={f.q}
-                            i={i}
-                            logo={f.logo}
-                            changePercent={changePercent}/>
+                        urls={f.urls} logo={f.logo} slug={f.slug} description={f.description} category={f.category} name={f.name} symbol={f.symbol} date_added={f.date_added}
+                        kline={f.kline}
+                        key={i}
+                        sp={f.sp}
+                        s={f.s}
+                        p={f.p}
+                        c={f.c}
+                        o={f.o}
+                        h={f.h}
+                        l={f.l}
+                        v={f.v}
+                        q={f.q}
+                        i={i}
+                        changePercent={changePercent}/>
                   }
                 } else {
                   if (i >= dnwPagination && i < upwPagination) {
                     return <Cells
+                      urls={f.urls} logo={f.logo} slug={f.slug} description={f.description} category={f.category} name={f.name} symbol={f.symbol} date_added={f.date_added}
+                      kline={f.kline}
+                      key={i}
+                      sp={f.sp}
                       s={f.s}
                       p={f.p}
                       c={f.c}
@@ -120,14 +164,13 @@ export default function WS(): ReactElement {
                       v={f.v}
                       q={f.q}
                       i={i}
-                      logo={f.logo}
                       changePercent={changePercent} />
                   }
                 }
               }
           })
     }
-    </>
+    </Suspense>
     )
   } else {
     return (
@@ -136,5 +179,4 @@ export default function WS(): ReactElement {
       </>
     )
   }
-  // eslint-disable-next-line no-else-return
 }
