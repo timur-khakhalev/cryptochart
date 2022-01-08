@@ -54,24 +54,13 @@ class KlineData {
 }
 
 @Schema()
-
-class Interval {
-
-    @Prop()
-    interval: string
-    
-    @Prop([KlineData])
-    k: string
-}
-
-@Schema()
 export class Kline {
 
     @Prop()
     pair: string
 
     @Prop([KlineData])
-    h8: string
+    data: string
 }
 
 export const KlineSchema = SchemaFactory.createForClass(Kline)

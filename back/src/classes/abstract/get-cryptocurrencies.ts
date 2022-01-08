@@ -10,4 +10,6 @@ export abstract class GetCryptocurrencies implements IGatewayInput {
     }
     
     abstract getCryptoData(): Observable<unknown>
+
+    abstract getKlineData(): Observable<unknown>
 }

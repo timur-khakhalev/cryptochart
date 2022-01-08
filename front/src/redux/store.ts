@@ -8,7 +8,6 @@ export const store = configureStore({
         pairFiltering: getWsSliceReducer,
         searchField: getWsSliceReducer,
         pagination: getWsSliceReducer,
-        getKlineData: getWsSliceReducer,
         getKlineFromDb: getWsSliceReducer,
         snackToggle: getWsSliceReducer
     },

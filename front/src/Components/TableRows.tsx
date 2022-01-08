@@ -1,16 +1,15 @@
-/* eslint-disable no-unused-expressions */
 import React, { ReactElement, useEffect, Suspense, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import { io } from 'socket.io-client';
 import { Snack } from './Snack';
+import { Loading } from './Loading'
 import { getPercentage } from '../utils/utils';
 import { RootState } from '../redux/store'
-import { getWsConnection, getKlineData, getKlineFromDb, snackToggle } from '../redux/slice';
-// import { Cells } from './Cells'
+import { getWsConnection, getKlineFromDb, snackToggle } from '../redux/slice';
 import { ICells } from '../interfaces/IWsConnection';
 
 const Cells = React.lazy(() => import('./Cells'))
-export default function WS(): ReactElement {
+export default function TableRows(): ReactElement {
   const [alert, setAlert] = useState<{ show: boolean, message: string, type: string }>({
     show: false,
     message: '',
@@ -40,23 +39,20 @@ export default function WS(): ReactElement {
         // pair: 'usdt',
         // method: '!miniTicker@arr',
       };
-      socket.emit('$CoinTicker', msg, (res: any) => {
-      });
+      socket.emit('$CoinTicker');
       if (checkKline) {
         let buff: string[] = []
         Object.values(klinePairs).map((v, i) => {
-          if (buff.length < 200) {
-            buff.push(v)
+          buff.push(v)
+          if (buff.length === 200) {
             const msgKline = {
               pairs: buff,
-              method: 'kline_8h'
             }
-            socket.emit('$Kline', msgKline, (res: any) => console.log('data sent', res))
+            socket.emit('$Kline', msgKline)
             buff = []
           }
         })
-        console.log(checkKline)
-        socket.emit('$KlineFromDb', 'llsl', (res: any) => dispatch(getKlineFromDb({data: res})))
+        socket.emit('$KlineFromDb', '', (res: object) => dispatch(getKlineFromDb({data: res})))
       }
     });
 
@@ -66,7 +62,6 @@ export default function WS(): ReactElement {
         message: JSON.stringify(err),
         type: 'error'
       })
-      console.log(err)
       dispatch(snackToggle())
     })
 
@@ -77,11 +72,10 @@ export default function WS(): ReactElement {
       prevSort !== sortBy
       socket.disconnect()
     }
-  }, [sortBy, checkKline]);
+  }, [checkKline]);
   if (coinTicker) {
     return (
-      // eslint-disable-next-line react/jsx-no-useless-fragment
-      <Suspense fallback={<>Loading..</>}>
+      <Suspense fallback={<Loading/>}>
         {
           alert.show ? <Snack message={alert.message} type={alert.type} /> : ''
         }
@@ -174,9 +168,7 @@ export default function WS(): ReactElement {
     )
   } else {
     return (
-      <>
-      Loading
-      </>
+      <Loading/>
     )
   }
 }

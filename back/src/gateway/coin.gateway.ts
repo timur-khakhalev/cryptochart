@@ -3,17 +3,16 @@ import { Server } from 'socket.io';
 import { map, Observable } from 'rxjs';
 import { WebSocketAPI } from '../classes/web-socket-api';
 import { IGatewayInput } from '../interfaces/ICoin';
-import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { KlinePayloadDto } from '../db/Kline.dto';
 import { KlineService } from 'src/kline/kline.service';
-import { WsapigatewayService } from 'src/wsapigateway/wsapigateway.service';
 
 @Injectable()
 @WebSocketGateway(811, {transports: ['websocket'], cors: true})
 export class WSAPIGateway {
 
   constructor(
-    private klineService: KlineService, private WsApiService: WsapigatewayService
+    private klineService: KlineService
   ){
   }
   @WebSocketServer()
@@ -22,8 +21,8 @@ export class WSAPIGateway {
   @SubscribeMessage('$CoinTicker')
   handleTicker(): Observable<void> {
     const method = '!miniTicker@arr'
-    // const coins = new WebSocketAPI(method)
-    return this.WsApiService.getData().pipe(map((c: string) => {
+    const coins = new WebSocketAPI(method)
+    return coins.getCryptoData().pipe(map((c: string) => {
       this.server.emit('CoinTicker$', c)
     }))
   }
@@ -36,7 +35,8 @@ export class WSAPIGateway {
   @SubscribeMessage('$Kline')
   handleKline(@MessageBody() data: IGatewayInput): Observable<void> {
     const pairNames = new Set()
-    const coins = new WebSocketAPI(data.method, data.pairs)
+    const method = 'kline_1d'
+    const coins = new WebSocketAPI(method, data.pairs)
     return coins.getKlineData().pipe(map((c: KlinePayloadDto) => {
       const {k} = c
       pairNames.add(k.s)
@@ -62,14 +62,20 @@ export class WSAPIGateway {
         if (_pair === k.s) {
           const checkIfExist: any = await this.klineService.getPair({pair: k.s})
           if (checkIfExist) {
-            if (checkIfExist.h8[checkIfExist.h8.length - 1].t !== k.t) {
-              await this.klineService.updateData({ pair: k.s }, {h8: _klineFormated})
+            if (checkIfExist.data[checkIfExist.data.length - 1]) {
+              const checkToDelete: number = k.t - checkIfExist.data[0].t
+              if (checkToDelete >= 604800000) { // Delete elements older than 7 days
+                await this.klineService.deleteElement(checkIfExist.data[0].t)
+              }
+              if (checkIfExist.data[checkIfExist.data.length - 1].t !== k.t) {
+                await this.klineService.updateData({ pair: k.s }, {data: _klineFormated})
+              }
             }
           } else {
-            await this.klineService.addData({
-              pair: k.s,
-              h8: _klineFormated
-            })
+              await this.klineService.addData({
+                pair: k.s,
+                data: _klineFormated
+              })
           }
         }
       })

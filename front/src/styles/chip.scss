@@ -1,4 +1,5 @@
 .Chip {
+    z-index: 10;
     background: rgb(234, 238, 255);
     height: 2em;
     width: auto;
@@ -10,13 +11,13 @@
     position: relative;
     display: inline-block;
     // border-bottom: 2px solid #BDBDBD;
-    border-radius: 40px;
+    border-radius: 15px;
     cursor: pointer;
-    -webkit-animation: shadow-hover 1000ms linear reverse both;
-    animation: shadow-hover 1000ms linear reverse both;
+    // -webkit-animation: shadow-hover-r 500ms linear both;
+    animation: shadow-hover-r 500ms linear both;
     &:hover {
-        -webkit-animation: shadow-hover 1000ms linear both;
-        animation: shadow-hover 1000ms linear both;
+        -webkit-animation: shadow-hover 500ms linear both;
+        animation: shadow-hover 500ms linear both;
     };
     &_fiats {
         margin: .5em;
@@ -38,7 +39,9 @@
 @keyframes shadow-hover {
     0% {
         -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+        box-shadow: 0px 0px 49px -30px rgba(10, 40, 99, 0.3),
+        -22px -22px 30px -25px rgba(10, 40, 99, 0.15) inset,
+        22px 22px 40px -22px rgba(143, 143, 143, 0.15) inset;
     }
 
     100% {
@@ -47,39 +50,15 @@
     }
 }
 
-@keyframes shadow-hover-reverse {
-    0% {
-        -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-    }
-
+@keyframes shadow-hover-r {
     100% {
+        box-shadow: 0px 0px 49px -30px rgba(10, 40, 99, 0.3),
+        -22px -22px 30px -25px rgba(10, 40, 99, 0.15) inset,
+        22px 22px 40px -22px rgba(143, 143, 143, 0.15) inset;
+    }
+    
+    0% {
         -webkit-box-shadow: 0px 0px 10px -7px rgba(0, 0, 0, .5);
-        box-shadow: 0px 0px 10px -7px rgba(0, 0, 0, .5);
-    }
-}
-
-@keyframes shadow-drop {
-    0% {
-        -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-    }
-
-    100% {
-        -webkit-box-shadow: 0px 0px 22px -7px rgba(0, 0, 0, .5);
         box-shadow: 0px 0px 22px -7px rgba(0, 0, 0, .5);
-    }
-}
-
-@keyframes shadow-drop-reverse {
-    0% {
-        -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-    }
-
-    100% {
-        -webkit-box-shadow: 0px 0px 22px -7px rgba(0, 0, 0, .5);
-        box-shadow: 0px 0px 22px -7px rgba(0, 0, 0, .5);
-    }
-
+   }
 }

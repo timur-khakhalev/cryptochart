@@ -18,7 +18,7 @@ export class WebSocketAPI extends GetCryptocurrencies implements IGatewayInput {
                 return `${_v.toLowerCase()}@${method}`
             })
         } else {
-            this.url = `${method}`
+            this.url = method
         }
         this.reqParams = {
             "method": "SUBSCRIBE",
@@ -54,7 +54,6 @@ export class WebSocketAPI extends GetCryptocurrencies implements IGatewayInput {
 
             const ws = new WebSocket(`wss://stream.binance.com:9443/ws/1234`)
             ws.onopen = () => {
-                // console.log(JSON.stringify(this.reqParams))
                 ws.send(JSON.stringify(this.reqParams))
             }
             ws.on('open', () => {
@@ -63,13 +62,9 @@ export class WebSocketAPI extends GetCryptocurrencies implements IGatewayInput {
             ws.onmessage = (msg: any) => {
                 const message = JSON.parse(msg.data)
                 if (message.k) {
-                    // console.log('message', message)
                     observer.next(message)
                 }
             }
-            // ws.on('error', (err: any) => {
-            //     this.logger.log(err)
-            // })
             ws.on('close', (event) => {
                 this.logger.log('Connection closed')
                 this.logger.log(`At ${this.method} was error`, event)

@@ -27,9 +27,7 @@
     ],
     "all": [
         "BUSD",
-        "USDC",
         "BNB",
-        "BTC",
         "ETH",
         "TRX",
         "DOGE",
@@ -42,6 +40,8 @@
         "TRY",
         "TUSD",
         "USDT",
+        "USDC",
+        "BTC",
         "DAI",
         "IDRT",
         "UAH",

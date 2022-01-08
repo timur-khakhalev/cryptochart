@@ -1,11 +1,20 @@
-import React, { FC, useState, useContext } from 'react'
-import { Dialog, Collapse, DialogTitle, Box, Card, Avatar, Button, ButtonGroup, Typography } from '@mui/material'
+import React, { FC, useState } from 'react'
+import { Dialog, Collapse, Box, Avatar, Typography } from '@mui/material'
 import { IosShare, Tag, ExpandMore, ExpandLess, Chat, Forum, Explore, Reddit, Twitter, Facebook } from '@mui/icons-material/';
-import { AreaChart, Area, Tooltip, XAxis, YAxis } from 'recharts';
+import { makeStyles } from '@mui/styles';
 import { IMetadata } from '../interfaces/IWsConnection'
 import '../styles/Metadata.scss'
 
+const useStyles = makeStyles({
+    dialog: {
+        boxShadow: '0px 0px 49px - 30px rgba(10, 40, 99, 0.3), 0px - 19px 57px - 34px rgba(10, 40, 99, 0.1) inset',
+        borderRadius: '15px'
+    }
+})
+
 export const Metadata: FC<IMetadata> = ({ open, onClose, p, urls, kline, logo, slug, category, name, symbol, date_added}) => {
+    const classes = useStyles()
+    const binanceLink: string = `https://www.binance.com/en/trade/${symbol}_${p}`
     const [collapse, setCollapse] = useState({
         social: false,
         chats: false,
@@ -13,18 +22,19 @@ export const Metadata: FC<IMetadata> = ({ open, onClose, p, urls, kline, logo, s
         explorer: false
     })
     return (
-        <Dialog open={open!} onClose={onClose!}>
+        <Dialog className={classes.dialog} open={open!} onClose={onClose!}>
             {urls && logo
-            ? <Card sx={{m: '0 auto'}}>
-                    <Avatar sx={{ display: 'inline-block', top: '.5em', m: '0 .5em' }} src={logo} /><Typography variant='h4' sx={{ display: 'inline-block' }}>{name}</Typography>
+                ? <div className='DialogContent'>
+                    <Avatar sx={{ display: 'inline-block', top: '2px', m: '0 .5em' }} src={logo} /><Typography variant='h3' sx={{ display: 'inline-block', fontWeight: 500 }}>{name}</Typography>
                     <Box className='Badge BadgeHead' >{symbol}</Box>
                     <Box className='Badge BadgeHead'>{category}</Box>
                     <Box sx={{mx: '.5em'}}>
                         <Typography variant="caption">
-                            Date added at {new Date(Date.parse(`${date_added}`)).toLocaleDateString('ru-RU')}
+                            Created at {new Date(Date.parse(`${date_added}`)).toLocaleDateString('ru-RU')}
                         </Typography>
                     </Box>
                     <Box>
+                        <Box className='Badge'><a href={binanceLink}><Typography><IosShare sx={{ top: '3px', position: 'relative' }} />Binance</Typography></a></Box>
                         <Box className='Badge'><a href={urls[0].website[0]}><Typography><IosShare sx={{top: '3px', position: 'relative'}} />Website</Typography></a></Box>
                         {urls[0].source_code[0]
                         ? <Box className='Badge'><a href={urls[0].source_code[0]}><Typography><IosShare sx={{ top: '3px', position: 'relative' }} />Source code</Typography></a></Box>
@@ -68,18 +78,7 @@ export const Metadata: FC<IMetadata> = ({ open, onClose, p, urls, kline, logo, s
                             })}
                         </Collapse>
                     </Box>
-                    <Box sx={{m: '0 auto', width: '25em'}}>
-                        <Typography align='center'>
-                            {symbol}/{p}
-                        </Typography>
-                        <AreaChart width={400} height={200} data={kline}>
-                            <YAxis dataKey="c"/>
-                            <XAxis dataKey="t" />
-                            <Tooltip />
-                            <Area type="monotone" dot={true} dataKey="c" />
-                        </AreaChart>
-                    </Box>
-                    </Card>
+                    </div>
                 : <Box sx={{ m: '1em' }}>No data</Box>}
                 </Dialog>
         )

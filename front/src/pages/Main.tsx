@@ -1,20 +1,18 @@
-import React, { useState, useEffect, ReactElement } from 'react';
+import React, { useState, ReactElement } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import {
-    Box, Paper, TextField, Button, IconButton, Table, TableBody, TableCell, TableSortLabel, TableContainer, TableHead, TableRow, Popover, Typography
+    Box, Paper, Button, IconButton, Table, TableBody, TableCell, TableSortLabel, TableContainer, TableHead, TableRow, Popover, Typography
 } from '@mui/material';
 import { AttachMoney, ArrowBack, ArrowForward} from '@mui/icons-material';
-import axios from 'axios'
-import WS from '../components/WS';
+import TableRows from '../components/TableRows';
 import { Snack } from '../components/Snack'
 import { RootState } from '../redux/store'
 import { setSortBy, pairFiltering, searchField, pagination, snackToggle } from '../redux/slice';
 import pairs from '../list/pairs.json';
 import '../styles/chip.scss'
+import '../styles/search.scss'
 
 export default function Main(): ReactElement {
-    const sortBy = useSelector((state: RootState) => state.getWsSlice.sortBy)
-    const metadata = useSelector((state: RootState) => state.getWsSlice.metadata)
     const pairFilter = useSelector((state: RootState) => state.getWsSlice.pairFilter)
     const [alert, setAlert] = useState<{ show: boolean, message: string, type: string }>({
         show: false,
@@ -49,38 +47,7 @@ export default function Main(): ReactElement {
         dispatch(pairFiltering({pairs: __coinsArrayToRedux}))
     }
 
-    const handleSendMeta = () => { //TODO:Переделать в отдельную функцию и сохранить
-        // console.log(metadata)
-        const buffSet = new Set()
-        let buff: any = []
-        // metadata.forEach((_m) => {
-        //     let i: number
-        //     for (let x of pairs.main) {
-        //         i = _m.indexOf(x)
-        //         if (i > 2) {
-        //             buffSet.add(_m.slice(0, i))
-        //         }
-        //     }
-        // })
-        metadata.forEach((_m) => {
-            if (_m !== '' && _m !== 'GXS' && _m !== 'NANO' && _m !== 'IOTA' && _m !== 'YOYO' && _m !== 'GHS' && _m !== 'IOS' && _m !== 'FRON') {
-                buffSet.add(_m)
-            }
-        })
-        // if (buffSet.delete('GXS')) {
-        //     buffSet.add('GXC')
-        // }
-        pairs.fiat.forEach((_c) => {
-            buffSet.delete(_c)
-        })
-        buff = [...buffSet]
-        console.log(buff)
-        axios.post(`http://localhost:3000/get-cmc?symbol=${buff.join(',')}`).then((r) => {
-            console.log(r)
-        })
-    }
-
-    const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -91,7 +58,9 @@ export default function Main(): ReactElement {
     };
 
     const handleChangeSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(searchField(event.target.value.toUpperCase()))
+        setTimeout(() => {
+            dispatch(searchField(event.target.value.toUpperCase().replace(/[^\w]/g, '')))
+        }, 500)
     };
 
     const open = Boolean(anchorEl);
@@ -102,7 +71,7 @@ export default function Main(): ReactElement {
           {
               alert.show ? <Snack message={alert.message} type={alert.type} /> : ''
           }
-          <Popover id={id} open={open} anchorEl={anchorEl} onClose={handleClose} anchorOrigin={{
+          <Popover open={open} anchorEl={anchorEl} id={id} onClose={handleClose} anchorOrigin={{
                   vertical: 'bottom',
                   horizontal: 'left',
               }}
@@ -112,14 +81,9 @@ export default function Main(): ReactElement {
               </Box>
           </Popover>
         <Paper sx={{ m: '1em', p: '1em' }}>
-              <TextField
-                sx={{bottom: '.3em', width: '7.5em'}}
-                id="search"
-                margin="dense"
-                size="small"
-                label="Search Coin"
-                onChange={handleChangeSearch}
-              />
+              <div className="searchFieldArea">
+                  <input type="search" placeholder='Search Coins' className="searchFieldArea_input" onChange={handleChangeSearch}/>
+              </div>
               <Box sx={{mx: '.5em', display: 'inline-block'}}>
                   Pages
                   <IconButton onClick={() => dispatch(pagination({ direction: 'back' }))}>
@@ -129,26 +93,26 @@ export default function Main(): ReactElement {
                       <ArrowForward />
                   </IconButton>
               </Box>
-              {/* variant={ _coin.has(p) ? 'filled' : 'outlined' } */}
+              Filters: {pairFilter.length > 0 ? `(${pairFilter.length})` : '(0)'}
             {pairs.main.map((p: string, i: number) => {
                 return <div className={_coin.has(p) ? 'Chip Chip_active' : 'Chip'} role='button' key={i} onClick={() => { handleCoins(p); }}>{p}</div>
             })}
-            <Button startIcon={<AttachMoney/>} size="small" color="inherit" variant="outlined" onClick={handleClick}>Fiats {pairFilter.length > 0 ? `(${pairFilter.length})` : ''}</Button>
+              <Button className='Chip' startIcon={<AttachMoney />} variant='contained' sx={{borderRadius: '40px', m: '0 .5em', p: '0 1em', height: '2.3em'}} color='inherit' role='button' onClick={handleClick}>Fiats</Button>
               <Table stickyHeader >
                 <TableHead>
                     <TableRow>
                           <TableCell>#</TableCell>
-                          <TableCell>Symbol</TableCell>
+                          <TableCell onClick={() => handleSort('default')}>Symbol</TableCell>
                           <TableCell><TableSortLabel direction={ascSort.sortDirection && ascSort.sortByColumn === 'price' ? 'asc' : !ascSort.sortDirection && ascSort.sortByColumn === 'price' ? 'desc' : 'asc'} active={true} onClick={() => handleSort('price')} >Price</TableSortLabel></TableCell>
                           <TableCell align="center"><TableSortLabel direction={ascSort.sortDirection && ascSort.sortByColumn === 'change' ? 'asc' : !ascSort.sortDirection && ascSort.sortByColumn === 'change' ? 'desc' : 'asc'} active={true} onClick={() => handleSort('change')}>Change, 24h</TableSortLabel></TableCell>
                         <TableCell align="center">H/L price, 24h</TableCell>
                           <TableCell align="center"><TableSortLabel direction={ascSort.sortDirection && ascSort.sortByColumn === 'coinVolume' ? 'asc' : !ascSort.sortDirection && ascSort.sortByColumn === 'coinVolume' ? 'desc' : 'asc'} active={true} onClick={() => handleSort('coinVolume')}>Coin Volume, 24h</TableSortLabel></TableCell>
                           <TableCell align="center"><TableSortLabel direction={ascSort.sortDirection && ascSort.sortByColumn === 'pairVolume' ? 'asc' : !ascSort.sortDirection && ascSort.sortByColumn === 'pairVolume' ? 'desc' : 'asc'} active={true} onClick={() => handleSort('pairVolume')}>Pair Volume, 24h</TableSortLabel></TableCell>
-                          <TableCell align="center">Chart</TableCell>
+                          <TableCell align="center">Change, Last 7 days</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    <WS/>
+                    <TableRows/>
                 </TableBody>
             </Table>
               <Box sx={{m: '0 auto', width: '10em'}}>

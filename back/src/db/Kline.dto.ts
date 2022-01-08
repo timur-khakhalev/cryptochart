@@ -21,26 +21,28 @@ export class KlinePayloadDto {
         V: string;
         Q: string;
     }
-
 }
+
+class KlineData {
+    t: number;
+    T: number;
+    s: string;
+    i: string;
+    f: number;
+    L: number;
+    o: number;
+    c: number;
+    h: number;
+    l: number;
+    v: number;
+    n: number;
+    x: boolean;
+    q: number;
+    V: number;
+    Q: number;
+}
+
 export class KlineDto{
-    pair?: string;
-    h8?: {
-            t: number;
-            T: number;
-            s: string;
-            i: string;
-            f: number;
-            L: number;
-            o: number;
-            c: number;
-            h: number;
-            l: number;
-            v: number;
-            n: number;
-            x: boolean;
-            q: number;
-            V: number;
-            Q: number;
-    }
+    pair: string;
+    data: KlineData;
 }

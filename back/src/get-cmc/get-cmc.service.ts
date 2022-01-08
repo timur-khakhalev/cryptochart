@@ -16,34 +16,35 @@ export class GetCmcService {
     ){
     }
 
-
-    getMetadata(params: string): Observable<AxiosResponse<any>> {
+    getMetadata(params: {symbol: string}): any {
         const header: AxiosRequestHeaders = { 'X-CMC_PRO_API_KEY': process.env.CMC_API_KEY }
         return this.http.get(`https://pro-api.coinmarketcap.com/v1/cryptocurrency/info?symbol=${params['symbol']}&aux=urls,logo,description,platform,date_added`, {headers: header})
         .pipe(
             map((res)=> {
-                return params['symbol'].split(',').map((r) => {
-                    this.addData({
-                        name: res.data.data[r.toUpperCase()]['name'],
-                        symbol: res.data.data[r.toUpperCase()]['symbol'],
-                        category: res.data.data[r.toUpperCase()]['category'],
-                        description: res.data.data[r.toUpperCase()]['description'],
-                        slug: res.data.data[r.toUpperCase()]['slug'],
-                        logo: res.data.data[r.toUpperCase()]['logo'],
-                        date_added: res.data.data[r.toUpperCase()]['date_added'],
-                        urls: res.data.data[r.toUpperCase()]['urls']
+                    return params['symbol'].split(',').map(async (r) => {
+                        if (res.data.data) {
+                            return await this.addDataToDb({
+                            name: res.data.data[r.toUpperCase()]['name'],
+                            symbol: res.data.data[r.toUpperCase()]['symbol'],
+                            category: res.data.data[r.toUpperCase()]['category'],
+                            description: res.data.data[r.toUpperCase()]['description'],
+                            slug: res.data.data[r.toUpperCase()]['slug'],
+                            logo: res.data.data[r.toUpperCase()]['logo'],
+                            date_added: res.data.data[r.toUpperCase()]['date_added'],
+                            urls: res.data.data[r.toUpperCase()]['urls']
+                        })
+                        }
                     })
-                })
             })
         )
     }
 
-    async addData(addDataDto: CryptocurrencyDto): Promise<Cryptocurrency> {
+    async addDataToDb(addDataDto: CryptocurrencyDto): Promise<Cryptocurrency> {
         const createdData = new this.cryptoModel(addDataDto)
-        return createdData.save()
+        return await createdData.save()
     }
 
-    async getData(): Promise<Cryptocurrency[]> {
-        return this.cryptoModel.find().exec()
+    async getDataFromDb(): Promise<Cryptocurrency[]> {
+        return await this.cryptoModel.find().exec()
     }
 }

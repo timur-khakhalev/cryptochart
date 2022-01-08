@@ -6,20 +6,15 @@ import { GetCmcService } from './get-cmc.service';
 export class GetCmcController {
     constructor(private getCMCService:GetCmcService){}
 
-    @Post()
-    getCmcMeta(@Query() params: string): any{
-        return this.getCMCService.getMetadata(params)
-    }
-
-    @Post()
-    async addData(@Query() CryptocurrencyDto: CryptocurrencyDto){
-        console.log('controller',CryptocurrencyDto)
-        await this.getCMCService.addData(CryptocurrencyDto)
-    }
+    //Manual adding coin's metadata below
+    // @Post('/tocmc') 
+    // async getCmcMeta(@Query() params: {symbol: string}): Promise<any> {
+    //     return await this.getCMCService.getMetadata(params)
+    // }
 
     @Get()
     getData() {
-        return this.getCMCService.getData()
+        return this.getCMCService.getDataFromDb()
     }
 
 }

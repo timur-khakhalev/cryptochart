@@ -1,32 +1,22 @@
-export interface IKline {
-    // kline?: {
-    //     t: number, //start time
-    //     T: number, //close time
-    //     s: string, //symbold
-    //     i: string, //interval
-    //     o: number,
-    //     c: number,
-    //     h: number,
-    //     l: number,
-    //     x: boolean, //is this kline closed?
-    //     q: number
-    // },
-    kline?: {
-        t: number, //start time
-        T: number, //close time
-        s: string, //symbold
-        i: string, //interval
-        o: number,
-        c: number,
-        h: number,
-        l: number,
-        x: boolean, //is this kline closed?
-        q: number
-    }[]
+interface _KlineData {
+    t: number, //start time
+    T: number, //close time
+    s: string, //symbold
+    i: string, //interval
+    o: number,
+    c: number,
+    h: number,
+    l: number,
+    x: boolean, //is this kline closed?
+    q: number
 }
 
-export interface ICandlestick {
-    t: string, //start time
+export interface IKline {
+    kline?: _KlineData[]
+}
+
+export interface IChartData {
+    t: number, //start time
     T: number, //close time
     s: string, //symbold
     i: string, //interval
@@ -84,7 +74,7 @@ export interface ICells extends IKline, IMetadata {
     i?: number;
 }
 
-export interface IminiTicker extends IKline, IMetadata {
+export interface ICoin extends IKline, IMetadata {
     e: string,
     E: number,
     sp: string,

@@ -14,16 +14,17 @@ export class KlineService {
         return this.KlineModel.find().exec()
     }
 
-    async getPair(query: any) {
+    async getPair(query: object) {
         return await this.KlineModel.findOne(query)
     }
 
     async updateData(filter: object, data: object) {
         const updating = await this.KlineModel.updateOne(filter, {$push: data})
-        // console.log(filter)
-        // console.log(data)
-        // console.log(updating)
         return updating
+    }
+
+    async deleteElement(query: object) {
+        return await this.KlineModel.deleteOne(query)
     }
 
     async addData(Data: KlineDto) { 
