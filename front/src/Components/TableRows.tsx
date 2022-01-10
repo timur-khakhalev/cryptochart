@@ -26,7 +26,7 @@ export default function TableRows(): ReactElement {
   const dispatch = useDispatch()
   useEffect(() => {
     const prevSort: string = sortBy
-    const socket = io('ws://localhost:811', { transports: ['websocket'] });
+    const socket = io('ws://crypto.tkhakhalev.info:1111', { transports: ['websocket'] });
     socket.on('connect', () => {
       setAlert({
         show: true,

@@ -45,7 +45,7 @@ export const getWsSlice = createSlice({
         getWsConnection: (state, action) => {
             const newestData = action.payload.data
             function getDatas() {
-                axios.get('http://localhost:3000/get-cmc').then((res) => { // Get metadata from db
+                axios.get('https://crypto.tkhakhalev.info:5001/get-cmc').then((res) => { // Get metadata from db
                     metaData = res.data
                 })
             }

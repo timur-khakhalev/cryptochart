@@ -8,7 +8,7 @@ import { KlinePayloadDto } from '../db/Kline.dto';
 import { KlineService } from 'src/kline/kline.service';
 
 @Injectable()
-@WebSocketGateway(811, {transports: ['websocket'], cors: true})
+@WebSocketGateway(1111, {transports: ['websocket'], cors: true})
 export class WSAPIGateway {
 
   constructor(
